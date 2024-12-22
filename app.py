@@ -29,6 +29,8 @@ def index():
     formatted_sql = ""
     response = None
     error = None
+    dialect = "redshift"
+    fallback_dialects = ["sparksql", "athena", "mysql", "postgres"]
 
     if request.method == 'POST':
         sql = request.form.get('sql')
@@ -56,8 +58,21 @@ def index():
                 error = "SQL input is required."
             else:
                 try:
-                    result = LineageRunner(sql)
+                    # Attempt lineage extraction with the selected dialect
+                    result = LineageRunner(sql, dialect=dialect)
+                except Exception as e:
+                    # If the first attempt fails, try fallback dialects
+                    error = f"Failed with dialect '{dialect}': {str(e)}"
+                    for fallback_dialect in fallback_dialects:
+                        try:
+                            result = LineageRunner(sql, dialect=fallback_dialect)
+                            error = None  # Clear error if successful
+                            dialect = fallback_dialect  # Update to the successful dialect
+                            break
+                        except Exception as fallback_error:
+                            error = f"Failed with fallback dialect '{fallback_dialect}': {str(fallback_error)}"
 
+                if not error:
                     source_tables = [str(tbl) for tbl in result.source_tables]
                     target_tables = [str(tbl) for tbl in result.target_tables]
 
@@ -65,11 +80,11 @@ def index():
                         "source_tables": source_tables,
                         "target_tables": target_tables,
                         "intermediate_tables": [str(tbl) for tbl in result.intermediate_tables],
+                        "used_dialect": dialect,
                     }
-                except Exception as e:
-                    error = str(e)
 
-    return render_template('index.html', sql=sql, formatted_sql=formatted_sql, response=response, error=error)
+    return render_template('index.html', sql=sql, formatted_sql=formatted_sql, response=response, error=error, dialect=dialect)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
