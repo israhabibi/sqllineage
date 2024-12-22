@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  flask-sql-lineage:
+    image: isranhabibi/flask-sql-lineage:latest  # Use the pre-built image from Docker Hub
+    container_name: flask-sql-lineage-container
+    ports:
+      - "8084:5000"    # Expose Flask app on port 5000
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development  # You can change this to production if needed

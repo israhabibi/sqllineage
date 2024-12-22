@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Lineage and Formatter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 10px;
+            padding: 10px;
+            font-family: monospace;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        .error {
+            color: red;
+        }
+        .response {
+            margin-top: 20px;
+        }
+        .response div {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SQL Lineage and Formatter</h1>
+
+        <form method="POST">
+            <label for="sql">Enter SQL Query:</label>
+            <textarea name="sql" id="sql">{{ sql }}</textarea>
+            <br>
+            <button type="submit" name="action" value="format_sql">Format SQL</button>
+            <button type="submit" name="action" value="lineage">Submit for Lineage</button>
+        </form>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if formatted_sql %}
+            <div class="result">
+                <h3>Formatted SQL:</h3>
+                <pre>{{ formatted_sql }}</pre>
+            </div>
+        {% endif %}
+
+        {% if response %}
+            <div class="response">
+                <h3>SQL Lineage:</h3>
+                <div><strong>Source Tables:</strong></div>
+                    <ul>
+                        {% for table in response.source_tables %}
+                            <li>{{ table }}</li>
+                        {% endfor %}
+                    </ul>
+                <div><strong>Target Tables:</strong> {{ response.target_tables | join(', ') }}</div>
+                <div><strong>Intermediate Tables:</strong> {{ response.intermediate_tables | join(', ') }}</div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
