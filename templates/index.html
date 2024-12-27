@@ -36,6 +36,7 @@
             padding: 10px;
             border: 1px solid #ccc;
             background-color: #f9f9f9;
+            position: relative;
         }
         .error {
             color: red;
@@ -45,6 +46,20 @@
         }
         .response div {
             margin-bottom: 10px;
+        }
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .copy-button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -66,14 +81,16 @@
 
         {% if formatted_sql %}
             <div class="result">
+                <button class="copy-button" id="copyButton" onclick="copyToClipboard()">Copy</button>
                 <h3>Formatted SQL:</h3>
-                <pre>{{ formatted_sql }}</pre>
+                <pre id="formatted-sql">{{ formatted_sql }}</pre>
             </div>
         {% endif %}
 
         {% if response %}
             <div class="response">
                 <h3>SQL Lineage:</h3>
+                <div><strong>Used Dialect:</strong> {{ response.used_dialect }}</div>
                 <div><strong>Source Tables:</strong></div>
                     <ul>
                         {% for table in response.source_tables %}
@@ -85,5 +102,33 @@
             </div>
         {% endif %}
     </div>
+
+    <script>
+        function copyToClipboard() {
+            const formattedSQL = document.getElementById("formatted-sql").innerText;
+
+            // Create a temporary textarea element to copy text
+            const tempTextarea = document.createElement("textarea");
+            tempTextarea.value = formattedSQL;
+            document.body.appendChild(tempTextarea);
+
+            // Select the text and copy it
+            tempTextarea.select();
+            tempTextarea.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand("copy");
+
+            // Remove the temporary element
+            document.body.removeChild(tempTextarea);
+
+            // Change button text to "Copied"
+            const copyButton = document.getElementById("copyButton");
+            copyButton.textContent = "Copied";
+
+            // Reset button text after 5 seconds
+            setTimeout(() => {
+                copyButton.textContent = "Copy";
+            }, 5000);
+        }
+    </script>
 </body>
 </html>
